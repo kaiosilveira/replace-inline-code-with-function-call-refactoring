@@ -1,48 +1,10 @@
-[![Continuous Integration](https://github.com/kaiosilveira/refactoring-catalog-template/actions/workflows/ci.yml/badge.svg)](https://github.com/kaiosilveira/refactoring-catalog-template/actions/workflows/ci.yml)
-
-# Refactoring catalog repository template
-
-This is a quick template to help me get a new refactoring repo going.
-
-## Things to do after creating a repo off of this template
-
-1. Replace `[REPOSITORY_NAME]` with the actual repository name
-
-2. Set the text in the project description in GitHub to
-
-```
-Working example with detailed commit history on the "[REPOSITORY_NAME]" refactoring based on Fowler's "Refactoring" book
-```
-
-3. Replace the lorem ipsum text sections below with actual text
-
-4. Configure the CI badge:
-
-```
-[![Continous Integration](https://github.com/kaiosilveira/[REPOSITORY_NAME]/actions/workflows/ci.yml/badge.svg)](https://github.com/kaiosilveira/[REPOSITORY_NAME]/actions/workflows/ci.yml)
-```
-
-## Useful commands
-
-- Generate a patch diff and write the result to a file:
-
-```bash
-git log --patch --reverse > data.diff
-```
-
-- Generates the commit history table for the last section, including the correct links
-
-```bash
- node node_modules/@kaiosilveira/refactoring-catalog-cli/dist [REPOSITORY_NAME]
-```
-
----
+[![Continuous Integration](https://github.com/kaiosilveira/replace-inline-code-with-function-call-refactoring/actions/workflows/ci.yml/badge.svg)](https://github.com/kaiosilveira/replace-inline-code-with-function-call-refactoring/actions/workflows/ci.yml)
 
 ℹ️ _This repository is part of my Refactoring catalog based on Fowler's book with the same title. Please see [kaiosilveira/refactoring](https://github.com/kaiosilveira/refactoring) for more details._
 
-# Refactoring name
+---
 
-**Formerly: Old name**
+# Replace Inline Code with Function Call
 
 <table>
 <thead>
@@ -54,7 +16,11 @@ git log --patch --reverse > data.diff
 <td>
 
 ```javascript
-result = initial.code;
+let appliesToMass = false;
+
+for (const s of states) {
+  if (s === 'MA') appliesToMass = true;
+}
 ```
 
 </td>
@@ -62,11 +28,7 @@ result = initial.code;
 <td>
 
 ```javascript
-result = newCode();
-
-function newCode() {
-  return 'new code';
-}
+appliesToMass = states.includes('MA');
 ```
 
 </td>
@@ -74,46 +36,45 @@ function newCode() {
 </tbody>
 </table>
 
-**Inverse of: [Another refactoring](https://github.com/kaiosilveira/refactoring)**
-
-**Refactoring introduction and motivation** dolore sunt deserunt proident enim excepteur et cillum duis velit dolor. Aute proident laborum officia velit culpa enim occaecat officia sunt aute labore id anim minim. Eu minim esse eiusmod enim nulla Lorem. Enim velit in minim anim anim ad duis aute ipsum voluptate do nulla. Ad tempor sint dolore et ullamco aute nulla irure sunt commodo nulla aliquip.
+Sometimes (and especially in large codebases) it's common for us to find code that is doing essentially the same sequence of computations that we have already encapsulated in a nearby function. In these cases, we can simply replace this block of computation with a function call.
 
 ## Working example
 
-**Working example general explanation** proident reprehenderit mollit non voluptate ea aliquip ad ipsum anim veniam non nostrud. Cupidatat labore occaecat labore veniam incididunt pariatur elit officia. Aute nisi in nulla non dolor ullamco ut dolore do irure sit nulla incididunt enim. Cupidatat aliquip minim culpa enim. Fugiat occaecat qui nostrud nostrud eu exercitation Lorem pariatur fugiat ea consectetur pariatur irure. Officia dolore veniam duis duis eu eiusmod cupidatat laboris duis ad proident adipisicing. Minim veniam consectetur ut deserunt fugiat id incididunt reprehenderit.
+Our working example is a pretty simple one: a function that checks whether or not we have `"MA"` as one of the states in a list of states. Our goal is to leverage the language support for this kind of operation, so we can make the code more idiomatic.
 
 ### Test suite
 
-Occaecat et incididunt aliquip ex id dolore. Et excepteur et ea aute culpa fugiat consectetur veniam aliqua. Adipisicing amet reprehenderit elit qui.
+Our test suite is straightforward: we test both possibilities for the `appliesToMass` function: either returning `true` or `false`:
 
 ```javascript
-describe('functionBeingRefactored', () => {
-  it('should work', () => {
-    expect(0).toEqual(1);
+describe('appliesToMass', () => {
+  it('should return true if Massachussets is in the list of states', () => {
+    expect(appliesToMass(['MA', 'NH', 'ME'])).toBe(true);
+  });
+
+  it('should return true if Massachussets is not in the list of states', () => {
+    expect(appliesToMass(['NH', 'ME'])).toBe(false);
   });
 });
 ```
 
-Magna ut tempor et ut elit culpa id minim Lorem aliqua laboris aliqua dolor. Irure mollit ad in et enim consequat cillum voluptate et amet esse. Fugiat incididunt ea nulla cupidatat magna enim adipisicing consequat aliquip commodo elit et. Mollit aute irure consequat sunt. Dolor consequat elit voluptate aute duis qui eu do veniam laborum elit quis.
-
 ### Steps
 
-**Step 1 description** mollit eu nulla mollit irure sint proident sint ipsum deserunt ad consectetur laborum incididunt aliqua. Officia occaecat deserunt in aute veniam sunt ad fugiat culpa sunt velit nulla. Pariatur anim sit minim sit duis mollit.
+This is a quick one: we just need to replace the existing `for` loop with `Array.includes`:
 
 ```diff
-diff --git a/src/price-order/index.js b/src/price-order/index.js
-@@ -3,6 +3,11 @@
--module.exports = old;
-+module.exports = new;
-```
-
-**Step n description** mollit eu nulla mollit irure sint proident sint ipsum deserunt ad consectetur laborum incididunt aliqua. Officia occaecat deserunt in aute veniam sunt ad fugiat culpa sunt velit nulla. Pariatur anim sit minim sit duis mollit.
-
-```diff
-diff --git a/src/price-order/index.js b/src/price-order/index.js
-@@ -3,6 +3,11 @@
--module.exports = old;
-+module.exports = new;
+diff --git a/src/index.js b/src/index.js
+@@ -1,9 +1,3 @@
+ export function appliesToMass(states) {
+-  let appliesToMass = false;
+-
+-  for (const s of states) {
+-    if (s === 'MA') appliesToMass = true;
+-  }
+-
+-  return appliesToMass;
++  return states.includes('MA');
+ }
 ```
 
 And that's it!
@@ -122,10 +83,6 @@ And that's it!
 
 Below there's the commit history for the steps detailed above.
 
-| Commit SHA                                                                  | Message                  |
-| --------------------------------------------------------------------------- | ------------------------ |
-| [cmt-sha-1](https://github.com/kaiosilveira/[REPOSITORY_NAME]/commit-SHA-1) | description of commit #1 |
-| [cmt-sha-2](https://github.com/kaiosilveira/[REPOSITORY_NAME]/commit-SHA-2) | description of commit #2 |
-| [cmt-sha-n](https://github.com/kaiosilveira/[REPOSITORY_NAME]/commit-SHA-n) | description of commit #n |
-
-For the full commit history for this project, check the [Commit History tab](https://github.com/kaiosilveira/[REPOSITORY_NAME]/commits/main).
+| Commit SHA                                                                                                                                    | Message                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| [fc4baf6](https://github.com/kaiosilveira/replace-inline-code-with-function-call-refactoring/commit/fc4baf6385f2437602fe677d4010c88da4900807) | replace `for` loop with `Array.includes` |
